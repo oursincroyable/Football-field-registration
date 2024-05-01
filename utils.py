@@ -1,5 +1,9 @@
 import numpy as np
 import skimage.segmentation as seg
+import cv2 as cv
+from scipy import ndimage
+
+from transformers import DPTImageProcessor
 
 #define the groundtruth keypoints on the minimap
 field_width = 114.83
@@ -13,6 +17,8 @@ grid_field = np.stack((grid_dw, grid_dh), axis=2).reshape(-1,2)
 palette = []
 for _, p in enumerate(grid_field):
     palette.append((np.rint(p[0]*255/field_width),np.rint(p[0]*255/field_width),np.rint(p[1]*255/field_height)))
+
+image_processor = DPTImageProcessor()
 
 # projected keypoints in football broadcast images
 def project_keypoints(image, hom):
