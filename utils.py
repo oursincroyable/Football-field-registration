@@ -63,3 +63,19 @@ def predict_keypoints(idx):
         image[predicted_segmentation_map == i+1, :] = color
 
     return image
+
+#estimate homography matrix from predicted keypoints/masks
+def predict_homography(label):
+    classes = np.unique(label)
+    classes = classes[classes != 0]
+
+    src = []
+    tgt = []
+    for c in classes:
+        src.append(ndimage.center_of_mass(label == c)[::-1])
+        tgt.append(grid_field[c - 1])
+
+    return cv.findHomography(np.array(src).reshape(-1, 1, 2),
+                                 np.array(tgt).reshape(-1, 1, 2),
+                                 method=cv.RANSAC,
+                                 ransacReprojThreshold=8)[0]
