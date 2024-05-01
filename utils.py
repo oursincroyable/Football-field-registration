@@ -79,3 +79,22 @@ def predict_homography(label):
                                  np.array(tgt).reshape(-1, 1, 2),
                                  method=cv.RANSAC,
                                  ransacReprojThreshold=8)[0]
+
+compute an error of estimated homography matrices 
+def error(hom_gt, hom_es):
+
+    proj_grid = np.concatenate((grid_field, np.ones((91, 1))), axis=1) @ np.linalg.inv(hom_gt.T)
+    proj_grid /= proj_grid[:, 2, np.newaxis]
+
+    num = 0
+    e = 0
+
+    for i in range(91):
+        x, y = proj_grid[i, :2]
+        if 0 <= x <= 1280 and 0 <= y <= 720:
+            num += 1
+            X, Y, Z = np.array([x, y, 1]) @ hom_es.T
+            X, Y = X/Z, Y/Z
+            e += ((X-grid_field[i][0])**2 + (Y-grid_field[i][1])**2)**0.5
+
+    return num, e
